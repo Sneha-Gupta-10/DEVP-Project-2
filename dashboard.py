@@ -33,23 +33,14 @@ if selected_import_export != "All":
 # Create columns for side-by-side visualization
 col1, col2 = st.columns(2)
 
-# Graph 1: Scatter plot of Quantity vs Value
+# Graph 1: Boxplot for Value based on Shipping Method
 with col1:
-    fig_scatter = px.scatter(filtered_sample, x='Quantity', y='Value', title='Scatter Plot of Quantity vs Value')
-    fig_scatter.update_layout(xaxis_title='Quantity', yaxis_title='Value')
-    st.plotly_chart(fig_scatter)
-
-# Graph 2: Boxplot for Value based on Shipping Method
-with col2:
     fig_boxplot = px.box(filtered_sample, x='Shipping_Method', y='Value', title=f'Boxplot of Value by Shipping Method')
     fig_boxplot.update_layout(xaxis_title='Shipping Method', yaxis_title='Value')
     st.plotly_chart(fig_boxplot)
 
-# Second row of two more graphs
-col3, col4 = st.columns(2)
-
-# Graph 3: Pie plot for Payment Terms
-with col3:
+# Graph 2: Pie plot for Payment Terms
+with col2:
     payment_terms_count = filtered_sample['Payment_Terms'].value_counts()
     labels = payment_terms_count.index.tolist()
     values = payment_terms_count.values.tolist()
@@ -58,18 +49,22 @@ with col3:
                      hole=0.3, labels={'values': 'Count', 'names': 'Payment Terms'})
     st.plotly_chart(fig_pie)
 
-# Graph 4: Histogram of Value
-with col4:
+# Second row of two more graphs
+col3, col4 = st.columns(2)
+
+# Graph 3: Histogram of Value
+with col3:
     fig_histogram = px.histogram(filtered_sample, x='Value', nbins=20, title='Histogram of Transaction Values', 
                                   color_discrete_sequence=['yellow'])
     fig_histogram.update_layout(xaxis_title='Value', yaxis_title='Frequency')
     st.plotly_chart(fig_histogram)
 
-# Third row: 3D scatter plot
-fig_3d = px.scatter_3d(
-    filtered_sample.groupby(['Import_Export', 'Category']).size().reset_index(name='Count'),
-    x='Import_Export', y='Category', z='Count',
-    color='Import_Export', title='3D Scatter: Category-wise Imports/Exports',
-    size_max=20
-)
-st.plotly_chart(fig_3d)
+# Graph 4: 3D scatter plot
+with col4:
+    fig_3d = px.scatter_3d(
+        filtered_sample.groupby(['Import_Export', 'Category']).size().reset_index(name='Count'),
+        x='Import_Export', y='Category', z='Count',
+        color='Import_Export', title='3D Scatter: Category-wise Imports/Exports',
+        size_max=20
+    )
+    st.plotly_chart(fig_3d)
