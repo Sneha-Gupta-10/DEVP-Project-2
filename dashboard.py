@@ -9,17 +9,26 @@ data = pd.read_csv(r'Imports_Exports_Dataset.csv')
 # Automatically sample 3001 rows
 mySample = data.sample(n=3001, random_state=55047)
 
-# Dropdown filters
-selected_product = st.selectbox('Select Product:', mySample['Product'].unique())
-selected_category = st.selectbox('Select Category:', mySample['Category'].unique())
-selected_import_export = st.selectbox('Select Import/Export:', mySample['Import_Export'].unique())
+# Sidebar filters
+shipping_methods = ["All"] + mySample['Shipping_Method'].unique().tolist()
+categories = ["All"] + mySample['Category'].unique().tolist()
+import_export_options = ["All"] + mySample['Import_Export'].unique().tolist()
 
-# Filter the sample based on the selections
-filtered_sample = mySample[
-    (mySample['Product'] == selected_product) &
-    (mySample['Category'] == selected_category) &
-    (mySample['Import_Export'] == selected_import_export)
-]
+selected_shipping_method = st.sidebar.selectbox('Select Shipping Method:', shipping_methods)
+selected_category = st.sidebar.selectbox('Select Category:', categories)
+selected_import_export = st.sidebar.selectbox('Select Import/Export:', import_export_options)
+
+# Apply the filters, and if 'All' is selected, ignore that filter
+filtered_sample = mySample.copy()
+
+if selected_shipping_method != "All":
+    filtered_sample = filtered_sample[filtered_sample['Shipping_Method'] == selected_shipping_method]
+
+if selected_category != "All":
+    filtered_sample = filtered_sample[filtered_sample['Category'] == selected_category]
+
+if selected_import_export != "All":
+    filtered_sample = filtered_sample[filtered_sample['Import_Export'] == selected_import_export]
 
 # Create columns for side-by-side visualization
 col1, col2 = st.columns(2)
@@ -30,10 +39,10 @@ with col1:
     fig_scatter.update_layout(xaxis_title='Quantity', yaxis_title='Value')
     st.plotly_chart(fig_scatter)
 
-# Graph 2: Boxplot for Value based on Product
+# Graph 2: Boxplot for Value based on Shipping Method
 with col2:
-    fig_boxplot = px.box(filtered_sample, x='Product', y='Value', title=f'Boxplot of Value for {selected_product}')
-    fig_boxplot.update_layout(xaxis_title='Product', yaxis_title='Value')
+    fig_boxplot = px.box(filtered_sample, x='Shipping_Method', y='Value', title=f'Boxplot of Value by Shipping Method')
+    fig_boxplot.update_layout(xaxis_title='Shipping Method', yaxis_title='Value')
     st.plotly_chart(fig_boxplot)
 
 # Second row of two more graphs
@@ -55,7 +64,7 @@ with col4:
                                   color_discrete_sequence=['yellow'])
     fig_histogram.update_layout(xaxis_title='Value', yaxis_title='Frequency')
     st.plotly_chart(fig_histogram)
-    
+
 # Third row: 3D scatter plot
 fig_3d = px.scatter_3d(
     filtered_sample.groupby(['Import_Export', 'Category']).size().reset_index(name='Count'),
