@@ -5,12 +5,10 @@ import plotly.express as px
 import plotly.figure_factory as ff
 
 # File uploader to allow users to upload a CSV file
-uploaded_file = st.file_uploader("Imports_Exports_Dataset", type=["csv"])
+uploaded_file = pd.read_csv(r'Imports_Exports_Dataset.csv')
 
 if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
-    st.write("Dataset loaded successfully!")
-    st.dataframe(data.head())  # Display the first few rows of the dataset
+    data = pd.read_csv(r'Imports_Exports_Dataset.csv')
 
     # Button to trigger sampling
     if st.button('Sample 3001 Rows'):
